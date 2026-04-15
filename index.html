@@ -282,7 +282,7 @@
     text-transform:uppercase; color:#fff; background:var(--anchor);
     padding:8px 16px; border-radius:var(--radius) var(--radius) 0 0; display:block;
   }
-  .checklist-items { border:0.5px solid var(--border-lt); border-top:none; border-radius:0 0 var(--radius) var(--radius); overflow:hidden; margin-bottom:18px; }
+  .checklist-items { will-change:auto; border:0.5px solid var(--border-lt); border-top:none; border-radius:0 0 var(--radius) var(--radius); overflow:hidden; margin-bottom:18px; }
   .check-item {
     display:flex; align-items:flex-start; gap:12px;
     padding:13px 18px; border-bottom:0.5px solid var(--border-lt);
@@ -427,6 +427,22 @@
   }
 
 
+
+
+  /* Animação de entrada segura — fallback visível */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* Garante visibilidade se JS falhar */
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in { opacity: 1 !important; transform: none !important; }
+  }
 
 </style>
 </head>
@@ -720,7 +736,7 @@
 
   <div class="visual-wrap">
     <div class="visual-title">Satisfação profissional no Brasil por geração — 2024</div>
-    <svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+    <svg style="max-width:100%;height:auto;" viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
       <!-- Eixo Y -->
       <line x1="80" y1="20" x2="80" y2="175" stroke="#E0DDD8" stroke-width="1"/>
       <!-- Linhas de grade -->
@@ -847,7 +863,7 @@
 
   <div class="visual-wrap">
     <div class="visual-title">As três camadas de habilidades — do visível ao invisível</div>
-    <svg viewBox="0 0 660 290" xmlns="http://www.w3.org/2000/svg">
+    <svg style="max-width:100%;height:auto;" viewBox="0 0 660 290" xmlns="http://www.w3.org/2000/svg">
       <!-- CAMADA 1 — Técnicas (topo, menor) -->
       <rect x="180" y="10" width="300" height="76" rx="6" fill="#D85A30"/>
       <text x="330" y="35" text-anchor="middle" font-size="13" fill="#fff" font-weight="bold" font-family="Georgia, serif">Habilidades Técnicas</text>
@@ -1013,7 +1029,7 @@
 
   <div class="visual-wrap">
     <div class="visual-title">Como a credibilidade se constrói em um novo ambiente</div>
-    <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+    <svg style="max-width:100%;height:auto;" viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
       <!-- Seta vertical de progresso -->
       <line x1="340" y1="280" x2="340" y2="30" stroke="#E0DDD8" stroke-width="1.5" stroke-dasharray="4,4"/>
       <polygon points="340,22 334,34 346,34" fill="#D85A30"/>
@@ -1167,7 +1183,7 @@
 
   <div class="visual-wrap">
     <div class="visual-title">O ciclo de visibilidade estratégica</div>
-    <svg viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg">
+    <svg style="max-width:100%;height:auto;" viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg">
       <!-- Conectores -->
       <defs>
         <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -1291,7 +1307,7 @@
 
   <div class="visual-wrap">
     <div class="visual-title">Matriz de decisão — O que fazer quando tudo é urgente</div>
-    <svg viewBox="0 0 660 280" xmlns="http://www.w3.org/2000/svg">
+    <svg style="max-width:100%;height:auto;" viewBox="0 0 660 280" xmlns="http://www.w3.org/2000/svg">
       <!-- Eixos -->
       <line x1="330" y1="20" x2="330" y2="260" stroke="#E0DDD8" stroke-width="1.5"/>
       <line x1="40" y1="140" x2="620" y2="140" stroke="#E0DDD8" stroke-width="1.5"/>
@@ -1494,7 +1510,7 @@
 
   <div class="visual-wrap">
     <div class="visual-title">Plano de crescimento acelerado — 12 meses</div>
-    <svg viewBox="0 0 660 240" xmlns="http://www.w3.org/2000/svg">
+    <svg style="max-width:100%;height:auto;" viewBox="0 0 660 240" xmlns="http://www.w3.org/2000/svg">
       <!-- Linha do tempo -->
       <line x1="40" y1="120" x2="620" y2="120" stroke="#E0DDD8" stroke-width="2"/>
 
@@ -2347,23 +2363,22 @@
     });
   });
 
-  // Animação de entrada ao rolar
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
+  // Animação de entrada — versão segura para mobile
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
 
-  document.querySelectorAll('section, .callout, .pq, .num-grid, .visual-wrap, .action-box').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(18px)';
-    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-    observer.observe(el);
-  });
+    document.querySelectorAll('section, .callout, .pq, .num-grid, .visual-wrap, .action-box').forEach(el => {
+      el.classList.add('fade-in');
+      observer.observe(el);
+    });
+  }
 
   // Progress bar de leitura
   const bar = document.createElement('div');
